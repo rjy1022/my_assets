@@ -1,0 +1,545 @@
+---
+title: "Project"
+author: "June Ro"
+date: "11/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("/Users/cathystout/Desktop/QTM 151")
+getwd()
+data <- read.csv("county_deaths_prop_column.csv") #Import data
+data
+
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+top_3 <- data %>% 
+  group_by(State) %>% 
+  summarise(average_prop_covid = mean(prop_covid)) %>% 
+  arrange(desc(average_prop_covid)) %>% 
+  head(3)
+
+top_3 #top 3 states with the highest covid deaths are NJ, ND and DC
+
+
+bottom_3 <- data %>% 
+  group_by(State) %>% 
+  summarise(average_prop_covid = mean(prop_covid)) %>% 
+  arrange(desc(average_prop_covid)) %>% 
+  tail(3)
+
+bottom_3 #bottom 3 states with the lowest covid deaths are ME, OR and HI
+
+top_bottom <- rbind(top_3, bottom_3)
+
+top_bottom
+
+top_bottom %>%
+ggplot(aes(reorder(State, -average_prop_covid), average_prop_covid)) +
+  geom_bar(aes(fill=State), stat="identity") +
+  labs(x="State", y="Mean Proportion of Covid Deaths", title="Top 3 and Bottom 3 States for Covid Death Rates")
+```
+
+```{r}
+
+
+#############THIS PART IS FOR VISUALIZATION, MOVE ON WITHOUT RUNNING THIS PART1#############
+install.packages("maps")
+library(maps)
+install.packages("ggmap")
+library(ggmap)
+
+long_lat_data <- read.csv("test.csv")
+long_lat_data
+
+county_df <- map_data("county") %>%
+    filter(region == "new jersey")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "new jersey")
+state_df
+
+
+
+states <- map_data("state")
+nj_df <- states %>%
+  filter(region == "new jersey")
+nj_df
+
+nj_base <- ggplot(data = nj_df, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_quickmap() + 
+  geom_polygon(color = "black", fill = "pink")
+
+nj_base + theme_void() + 
+  geom_polygon(data = county_df, aes(x=long, y=lat, group=group),fill = NA, color = "white") +
+  geom_polygon(data=state_df, color = "black", fill = NA) 
+
+```
+
+
+New Jersey viz
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "new jersey")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "new jersey")
+state_df
+
+nj_data <- data %>% filter(State == "NJ") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+nj_data$County <- tolower(nj_data$County)
+nj_data
+
+mapdat <- left_join(nj_data, county_df, by = c("County"="subregion"))
+mapdat %>% filter(County=="cape")
+nj_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+nj_lat_long
+mapdat %>% filter(County == "union")
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="blue", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="blue"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=nj_lat_long, aes(long, lat, label = County, size=I(2.5))) + geom_text(aes(x=-74.8, y=39.2, label = "cape", alpha=I(0.01), size=I(2.5)))
+ 
+```
+
+
+Maine viz
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "maine")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "maine")
+state_df
+
+data
+maine_data <- data %>% filter(State == "ME") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+maine_data$County <- tolower(maine_data$County)
+maine_data
+
+mapdat <- left_join(maine_data, county_df, by = c("County"="subregion"))
+
+maine_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+maine_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=maine_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+
+Oregon viz
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "oregon")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "oregon")
+state_df
+
+data
+or_data <- data %>% filter(State == "OR") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+or_data$County <- tolower(or_data$County)
+or_data
+
+mapdat <- left_join(or_data, county_df, by = c("County"="subregion"))
+
+or_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+or_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=or_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "new york")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "new york")
+state_df
+
+data
+ny_data <- data %>% filter(State == "NY") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+ny_data$County <- tolower(ny_data$County)
+ny_data
+
+mapdat <- left_join(ny_data, county_df, by = c("County"="subregion"))
+
+ny_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+ny_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=ny_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+
+
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "georgia")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "georgia")
+state_df
+
+data
+ga_data <- data %>% filter(State == "GA") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+ga_data$County <- tolower(ga_data$County)
+ga_data
+
+mapdat <- left_join(ga_data, county_df, by = c("County"="subregion"))
+
+ga_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+ga_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=ga_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "california")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "california")
+state_df
+
+data
+ca_data <- data %>% filter(State == "CA") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+ca_data$County <- tolower(ca_data$County)
+ca_data
+
+mapdat <- left_join(ca_data, county_df, by = c("County"="subregion"))
+
+ca_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+ca_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=ca_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "florida")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "florida")
+state_df
+
+data
+fl_data <- data %>% filter(State == "FL") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+fl_data$County <- tolower(fl_data$County)
+fl_data
+
+mapdat <- left_join(fl_data, county_df, by = c("County"="subregion"))
+
+fl_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+fl_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="pink", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=fl_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "washington")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "washington")
+state_df
+
+data
+wa_data <- data %>% filter(State == "WA") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+wa_data$County <- tolower(wa_data$County)
+wa_data
+
+mapdat <- left_join(wa_data, county_df, by = c("County"="subregion"))
+
+wa_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+wa_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill=NA, colour = "black") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=wa_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+```{r}
+county_df <- map_data("county") %>%
+    filter(region == "texas")
+county_df
+state_df <- map_data("state")%>%
+    filter(region == "texas")
+state_df
+
+data
+tx_data <- data %>% filter(State == "TX") %>% separate(County.name, c("County", "test"), sep = " ") %>% select(-test)
+tx_data$County <- tolower(tx_data$County)
+tx_data
+
+mapdat <- left_join(tx_data, county_df, by = c("County"="subregion"))
+
+tx_lat_long <- mapdat %>% select(County, long, lat, prop_covid, group) %>%  group_by(County) %>% summarise(long = mean(long, na.rm=T), lat = mean(lat, na.rm=T), prop = mean(prop_covid, na.rm=T), group=mean(group, na.rm=T)) 
+tx_lat_long
+
+
+ ggplot(mapdat, aes(long, lat, group = group), color = "white", fill=NA) +
+        geom_polygon(data = state_df, fill="gray", colour = "white") + 
+        theme_void() + 
+        geom_polygon(aes(fill = prop_covid, color="white"), colour = alpha("white", 1/2)) +coord_fixed(1.2) + scale_fill_gradient(low="blue", high="red") +
+        geom_text(data=tx_lat_long, aes(long, lat, label = County, size=I(2.5))) 
+```
+
+
+Bottom: ME = Maine (lowest death due to COVID)
+```{r}
+Bottom_ME <- data %>% 
+  filter(State =="ME") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Bottom_ME
+```
+
+Bottom: HI = Hawaii (second lowest death due to COVID)
+```{r}
+Bottom_HI <- data %>% 
+  filter(State =="HI") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Bottom_HI
+```
+
+Bottom: OR = Oregon (third lowest death due to COVID)
+```{r}
+Bottom_OR <- data %>% 
+  filter(State =="OR") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Bottom_OR
+```
+
+
+
+Top: NJ = New Jersey (highest death due to COVID)
+```{r}
+Top_NJ <- data %>% 
+  filter(State =="NJ") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Top_NJ
+```
+
+Top: DC = DC Metopolitan(second highest death due to COVID)
+```{r}
+Top_DC <- data %>% 
+  filter(State =="DC") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Top_DC
+```
+
+Top: ND = North Dakota (third highest death due to COVID)
+```{r}
+Top_ND <- data %>% 
+  filter(State =="ND") %>% 
+  select("State", "County.name", "Urban.Rural.Code", "prop_covid") %>% 
+  group_by(Urban.Rural.Code) %>% 
+  arrange(desc(prop_covid))
+  
+Top_ND
+```
+
+
+```{r}
+data_6states <- data %>% 
+  filter(State == "ME" | State == "HI" | State == "OR" | State == "ND" | State == "NJ" | State == "DC") 
+
+data_6states
+```
+
+
+```{r}
+#sort prop covid among 6 states for large central metro type
+top_lcm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Large central metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_lcm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Large central metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+lcm <- rbind(top_lcm, low_lcm)
+
+lcm
+
+#Highest prop_covid by death for a specific county for large central metro type is Hudson County in New Jersey (0.29), while lowest is Multnomah County in Oregon (0.04).
+```
+
+
+```{r}
+#sort prop covid among 6 states for micropolitan type
+top_micro <- data_6states %>% 
+  filter(Urban.Rural.Code == "Micropolitan") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_micro <- data_6states %>% 
+  filter(Urban.Rural.Code == "Micropolitan") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+
+micro <- rbind(top_micro, low_micro)
+micro
+
+#Highest prop_covid by death per cases for a specific county for micropolitan type is McHenry County, North Dakota (0.25) , while lowest is Kennebec County in Maine (0.01).
+```
+
+
+```{r}
+#sort prop covid among 6 states for medium metro type
+top_mm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Medium metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_mm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Medium metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+mm <- rbind(top_mm, low_mm)
+
+mm
+
+#Highest prop_covid by death per cases for a specific county for medium metro type is  Mercer County in New Jersey (0.20), while lowest is Lane County in Oregon (0.01).
+```
+
+```{r}
+#sort prop covid among 6 states for small metro type
+top_sm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Small metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_sm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Small metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+sm <- rbind(top_sm, low_sm)
+
+sm
+
+#Highest prop_covid by death per cases for a specific county for small metro type is Burleigh County in North Dakota (0.11), while lowest is Jackson County in Oregon (0.005).
+```
+
+```{r}
+#sort prop covid among 6 states for noncore type (but note that there are only two counties listed in noncore type)
+top_nc <- data_6states %>% 
+  filter(Urban.Rural.Code == "Noncore") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_nc <- data_6states %>% 
+  filter(Urban.Rural.Code == "Noncore") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+nc <- rbind(top_nc, low_nc)
+
+nc
+
+#Highest prop_covid by death per cases for a specific county for noncore type is Bottineau County in North Dakota (0.28), while lowest is Waldo County in Maine (0.07).
+```
+
+```{r}
+#sort prop covid among 6 states for large fringe metro type
+top_lfm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Large fringe metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(1)
+
+low_lfm <- data_6states %>% 
+  filter(Urban.Rural.Code == "Large fringe metro") %>% 
+  arrange(desc(prop_covid)) %>% 
+  top_n(-1)
+
+lfm <- rbind(top_lfm, low_lfm)
+
+lfm
+
+#Highest prop_covid by death per cases for a specific county for Large fringe metro type is Passaic County in New Jersey (0.27), while the lowest is Yamhill County in Oregon (0.02).
+```
+
+Graph of Highest and Lowest Proportion of COVID-19 Deaths based on City Type   
+```{r}
+top_bottom <- rbind(lcm, micro, mm, sm, nc, lfm)
+
+ggplot(data=top_bottom, aes(x=Urban.Rural.Code, y=prop_covid)) +
+  geom_bar(aes(fill = State), stat="identity", position="dodge") + 
+  xlab("Urban Rural Code") +
+  ylab("Proportion of Total Deaths due to COVID-19") +
+  ggtitle("States with the Highest Proportion of COVID-19 deaths in Individual Types of Cities")
+```
+
+State Population Density
+```{r}
+#Data from: https://www.statista.com/statistics/183588/population-density-in-the-federal-states-of-the-us/
+state <- c("NJ", "ME", "OR", "ND")
+density <- c(1207.8, 43.6, 43.9, 11)
+df1 <- data.frame(state)
+df2 <- data.frame(density)
+state_density <- cbind(df1,df2)
+
+ggplot(data=state_density, aes(x=state, y=density)) +
+  geom_bar(aes(fill = state), stat="identity") +
+  scale_y_log10() + 
+  ylab("log10 density (residents/square mile)") + 
+  ggtitle("Population Density by State")
+```
+Third slide: state mask mandates and voting for trump or biden 
+
+
+
+
