@@ -1,0 +1,150 @@
+---
+title: "ExploratoryResearch"
+author: "June Ro"
+date: "7/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+install.packages("ggplot2",repos = 'http://cran.us.r-project.org')
+suppressWarnings(library(ggplot2))
+install.packages("dplyr",repos = 'http://cran.us.r-project.org')
+suppressWarnings(library(dplyr))
+```
+
+# Variables for dietary habits
+
+> average consumption of water (in glasses)
+
+```{r}
+load("MIDUS.rda")
+da29282.0001 <- rename(da29282.0001, water = B4H19)
+table2 <- table(da29282.0001$water)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = water)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "darkolivegreen3") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("water consumption")
+```
+
+> average consumption of sugared beverages (in glasses)
+
+```{r}
+da29282.0001 <- rename(da29282.0001, sugar = B4H20)
+table2 <- table(da29282.0001$sugar)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = sugar)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "coral2") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("sugared beverage consumption")
+
+```
+
+> average servings of fruit and vegetables
+
+```{r}
+da29282.0001 <- rename(da29282.0001, fruitsVeggies = B4H21)
+table2 <- table(da29282.0001$fruitsVeggies)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = fruitsVeggies)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "plum4") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("fruits and vegetables consumption")
+```
+
+> average servings of whole grain
+
+```{r}
+da29282.0001 <- rename(da29282.0001, wholeGrain = B4H22)
+table2 <- table(da29282.0001$wholeGrain)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = wholeGrain)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "peachpuff3") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("whole grain consumption")
+
+```
+
+> average consumption of ocean fish
+
+```{r}
+da29282.0001 <- rename(da29282.0001, fish = B4H23A)
+table2 <- table(da29282.0001$fish)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = fish)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "lightblue3") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("ocean fish consumption")
+```
+
+> average consumption of lean meat
+
+```{r}
+da29282.0001 <- rename(da29282.0001, meat = B4H23C)
+table2 <- table(da29282.0001$meat)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = meat)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "sienna3") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("lean meat consumption")
+
+```
+
+# Variables for health indicators
+
+> blood relatives diabetes
+
+```{r}
+da29282.0001 <- rename(da29282.0001, diabetes = B4H15F)
+table2 <- table(da29282.0001$diabetes)
+round((prop.table(table2)*100), digits=2) #percentages round up to 2 
+
+ggplot(data = da29282.0001, aes(x = diabetes)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), fill = "skyblue4") +
+  scale_y_continuous(labels=scales::percent) +
+  ylab("percentage") +
+  xlab("blood relative diabetes")
+
+```
+
+> blood hemoglobin A1c %
+
+```{r}
+da29282.0001 <- rename(da29282.0001, hemoglobin = B4BHA1C)
+summary(da29282.0001$hemoglobin)
+```
+
+> average BP diastolic
+
+```{r}
+da29282.0001 <- rename(da29282.0001, BPdiastolic = B4P1GD)
+summary(da29282.0001$BPdiastolic)
+```
+
+> average BP systolic
+
+```{r}
+da29282.0001 <- rename(da29282.0001, BPsystolic = B4P1GS)
+summary(da29282.0001$BPsystolic)
+```
+
+
+
