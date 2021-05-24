@@ -1,0 +1,102 @@
+---
+title: "QTM 150 Final Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+airbnb <- read.csv("AB_NYC_2019.csv") #import dataset
+dim(airbnb) #48895 observations, 16 columns
+
+install.packages("ggplot2", repos = 'http://cran.us.r-project.org') #install the package; the 'repos' line is to prevent error when knitting
+library(ggplot2) #open ggplot2
+
+install.packages("dplyr", repos = 'http://cran.us.r-project.org') #install the package; the 'repos' line is to prevent error when knitting
+library(dplyr) #open dplyr
+
+```
+
+
+```{r}
+colnames(airbnb) #explore variables
+
+#rename variable names that are too long
+names(airbnb)[names(airbnb) == "neighbourhood_group"] <- "location"
+names(airbnb)[names(airbnb) == "number_of_reviews"] <- "numreviews"
+names(airbnb)[names(airbnb) == "calculated_host_listings_count"] <- "listings"
+names(airbnb)[names(airbnb) == "availability_365"] <- "availability"
+
+```
+```{r}
+#Research Question 1
+#What trend do price ranges show for each neighbourhood location?
+#price range: 0-100 (low), 100-200 (average), 200-500 (high) and 500+ (very high) 
+#explanatory variable: neighbourhood location; response variable: price range
+#rationale: To explore the distribution of affordability among different locations of New York. One of the factors that my peers and I consider when choosing an Airbnb is the price, because Airbnb becomes much more attractive to students when it is of good quality but more affordable than hotels. In addition, New York is one of the most popular travel places that student choose for breaks during the semester. 
+
+summary(airbnb$price) #min: 0; median: 106; mean: 152; max: 10000
+#price range was determined based on this statistics; prices centered around the mean value were set to 'average', and the reset were determined accordingly.
+
+airbnb$price_level<-factor(airbnb$price,levels=c("low","average", "high", "very high")) 
+#the quantitative variable 'price' was recoded to categorical variable with 4 levels
+
+airbnb$price_level[airbnb$price<100] <- "low"
+
+airbnb$price_level[airbnb$price>=100 & airbnb$price<200] <- "average"
+
+airbnb$price_level[airbnb$price>=200 & airbnb$price<500] <- "high"
+
+airbnb$price_level[airbnb$price>=500] <- "very high"
+
+airbnb$price_level[airbnb$price==" " | airbnb$price=="NA"]<-NA
+
+summary(airbnb$price_level)
+
+
+airbnb %>% 
+  select(location, price_level) %>% 
+  group_by(location) %>%  #location is the explanatory variable, so should go on the x axis
+  ggplot(aes(location))+
+  geom_bar(aes(fill=price_level), position="dodge")+
+  labs(x="Location",y="Number of Airbnb",title="Location of Airbnb and Price Level")
+
+#conclusion
+#Staten Island and Bronx show the lowest frequency in the dataset, but most of their Airbnb are low in price range. The highest number of Airbnb in New York were located in Brooklyn, and the Airbnb in the low price range was twice as frequent as the Airbnb in the average price range. Queens followed the same trend as Brooklyn, but its total number of Airbnb was much lower than Brooklyn. Manhattan was the only location that deviated from this trend, because the highest number of their Airbnb was in the average price range.  
+#An additional research question may ask the relationship between neighbourhood locations and the number of Airbnb users in each location. In particular, the 'longitude' and 'latitude' variables can be used to calculate the accurate distance between one Airbnb to another in order to investigate how the number of people who book an Airbnb in Manhattan, for example, has an effect on the number of people who book an Airbnb in Brooklyn, if the distance between the two locations is less than/greater than XYZ km.
+```
+
+```{r}
+#Research Question 2
+#How does price and number of reviews correlate with each other, and how do these correlations vary for different locations in New York? How do they vary for different room types?
+#explanatory variable: price; response variable: number of reviews, location, room type
+#rationale: Airbnb's mission statement emphasizes affordability, sense of belonging and approachable presence. If indeed their effort was made successfully, the data may tell us that more people left reviews (which may be interpreted that Airbnb users actively give feedback on their stays) for more affordable stays. Further, how does the correlation between price and number of reviews differ between the locations in New York? Would they also differ depending on the type of room they booked for? Perhaps those who stayed with their friends or families chose more pricey options and left less reviews, because the main focus of their stay was not the price or the quality of the place but the fact that they were traveling together.
+
+summary(airbnb$room_type) #3 room types: entire home/apt; private room; shared room
+
+airbnb$room <- factor(airbnb$room_type, levels=c("entire home","private","shared")) 
+#recode 'room_type' to make the names of the levels easier to read
+
+airbnb$room[airbnb$room_type=="Entire home/apt"] <- "entire home"
+airbnb$room[airbnb$room_type=="Private room"] <- "private"
+airbnb$room[airbnb$room_type=="Shared room"] <- "shared"
+summary(airbnb$room)
+
+
+#for each location
+airbnb %>% 
+  filter(price<700, numreviews<300) %>%  #Constraints on price and number of reviews were necessary because the extreme outliers negatively affected the appropriate visualization of the data and obscured clear interpretation of the data that mattered more, such as the majority of the average population of price and number of reviews
+  ggplot(aes(x=price, y=numreviews))+
+  geom_point(aes(color=room))+
+  facet_wrap(~location)+
+  labs(x="Price",y="Number of Reviews",title="Number of Reviews for Different Price")
+
+#conclusion
+#For all five locations, lower price correlated with higher number of reviews. I interpreted this result as Airbnb's successful advertisement on their affordable hostings. The correlation varied between different room types, but all five locations indicated that such correlation varied the most among those who booked the entire home, compared to private or shared Airbnb. This result was contrary to my hypothesis that the majority of those who booked the entire home would leave less reviews than others regardless of the price. 
+#An additional research question may focus on only Brooklyn and Manhattan's data, because those two regions have much larger observations than the other regions. Within those two regions, we can bring in a different variable from the dataset, such as 'name', and factor the names of the Airbnb to multiple levels. Advanced coding may be able to classify the Airbnb names by specific adjectives they contain, such as those that contain 'cozy' and those that contain 'fun',and compare how different wordings of the Airbnb names have an effect on the number of reviews and number of listings. 
+
+```
+
