@@ -1,0 +1,632 @@
+---
+title: "HEI & PES"
+author: "June Ro"
+date: "8/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+```{r, import data}
+US <- da29282.0001 %>% select( water = B4H19, sugared_beverages = B4H20, vegetables = B4H21, whole_grains = B4H22, lean_meat = B4H23C, ocean_fish = B4H23A, high_fat_meat = B4H23B, nonmeat_proteins = B4H23D, fastfood = B4H24, meet_someone_new = B4Q10B1, help_someone = B4Q10E1, laugh = B4Q10I1, open_conversation = B4Q10K1, party = B4Q10L1, with_friends = B4Q10N1, popular_gathering = B4Q10O1,  goodthings_family_friends = B4Q10R1,  lively_talk = B4Q10T1, be_with_family = B4Q10U1, sexually_attractive = B4Q10Z1,  complement_someone = B4Q10BB1, kiss =  B4Q10DD1, amuse_people = B4Q10KK1, be_with_loved_ones = B4Q10LL1, sexual_relations = B4Q10MM1, be_with_happy_people = B4Q10OO1, smile_at_people = B4Q10PP1, be_with_spouse = B4Q10QQ1, teach_advise_someone = B4Q10RR1, see_old_friends = B4Q10UU1, give_thanks = B4Q10M1, appreciate_nature = B4Q10A1, plan_trips = B4Q10C1, read = B4Q10D1, time_with_animals = B4Q10J1, breathe_air = B4Q10F1, say_clearly = B4Q10G1, good_future = B4Q10H1, TV_movies = B4Q10P1, sit_in_sun = B4Q10Q1, plan_something = B4Q10S1, relaxing_bath = B4Q10V1, see_beautiful_scenery = B4Q10W1, eat_good_meals = B4Q10X1, have_spare_time = B4Q10Y1, learn_something_new = B4Q10AA1, pray_meditate = B4Q10EE1, good_workout = B4Q10JJ1, project_own_way = B4Q10FF1, be_relaxed = B4Q10HH1, sleep_soundly = B4Q10II1, shop = B4Q10VV1, feel_no_pain = B4Q10WW1) 
+
+summary(US)
+
+Japan <- da34969.0001 %>% select(water = J2Q29, sugared_beverages = J2Q30, vegetables = J2Q31, whole_grains = J2Q33, ocean_fish = J2Q34A, high_fat_meat = J2Q34B, lean_meat = J2Q34C, nonmeat_proteins = J2Q34D, fastfood = J2Q35, meet_someone_new = J2Q46B1, help_someone = J2Q46E1, laugh = J2Q46I1, open_conversation = J2Q46K1, party = J2Q46L1, with_friends = J2Q46N1, popular_gathering = J2Q46O1,  goodthings_family_friends = J2Q46R1,  lively_talk = J2Q46T1, be_with_family = J2Q46U1, sexually_attractive = J2Q46Z1,  complement_someone = J2Q46BB1, kiss =  J2Q46DD1, amuse_people = J2Q46KK1, be_with_loved_ones = J2Q46LL1, sexual_relations = J2Q46MM1, be_with_happy_people = J2Q46OO1, smile_at_people = J2Q46PP1, be_with_spouse = J2Q46QQ1, teach_advise_someone = J2Q46RR1, see_old_friends = J2Q46UU1, give_thanks = J2Q46M1, appreciate_nature = J2Q46A1, plan_trips = J2Q46C1, read = J2Q46D1, time_with_animals = J2Q46J1, breathe_air = J2Q46F1, say_clearly = J2Q46G1, good_future = J2Q46H1, TV_movies = J2Q46P1, sit_in_sun = J2Q46Q1, plan_something = J2Q46S1, relaxing_bath = J2Q46V1, see_beautiful_scenery = J2Q46W1, eat_good_meals = J2Q46X1, have_spare_time = J2Q46Y1, learn_something_new = J2Q46AA1, pray_meditate = J2Q46EE1, good_workout = J2Q46JJ1, project_own_way = J2Q46FF1, be_relaxed = J2Q46HH1, sleep_soundly = J2Q46II1, shop = J2Q46VV1, feel_no_pain = J2Q46WW1)
+
+summary(Japan)
+head(Japan)
+```
+
+```{r, US DIET}
+head(US)
+
+US$WATER[US$water == "(1) NONE"] <- 0
+US$WATER[US$water == "(5) LESS THAN 1 GLASSES/DAY"] <- 4
+US$WATER[US$water == "(2) 1-3 GLASSES/DAY"] <- 6
+US$WATER[US$water == "(3) 4-7 GLASSES/DAY"] <- 8
+US$WATER[US$water == "(4) 8 OR MORE GLASSES/DAY"] <- 10
+
+
+US$SUGAR[US$sugared_beverages == "(4) 7 OR MORE GLASSES/DAY"] <- 0
+US$SUGAR[US$sugared_beverages == "(3) 4-6 GLASSES/DAY"] <- 6
+US$SUGAR[US$sugared_beverages == "(2) 1-3 GLASSES/DAY"] <- 8
+US$SUGAR[US$sugared_beverages == "(5) LESS THAN 1 GLASSES/DAY"] <- 10
+US$SUGAR[US$sugared_beverages == "(1) NONE"] <- 10
+
+
+US$VEGGIES[US$vegetables == "(1) NONE"] <- 0
+US$VEGGIES[US$vegetables == "(5) LESS THAN 1 SERVING/DAY"] <- 4
+US$VEGGIES[US$vegetables == "(2) 1-2 SERVINGS/DAY"] <- 6
+US$VEGGIES[US$vegetables == "(3) 3-4 SERVINGS/DAY"] <- 8
+US$VEGGIES[US$vegetables == "(4) 5 OR MORE SERVINGS/DAY"] <- 10
+
+
+US$GRAINS[US$whole_grains == "(1) NONE"] <- 0
+US$GRAINS[US$whole_grains == "(5) LESS THAN 1 SERVING/DAY"] <- 0
+US$GRAINS[US$whole_grains == "(2) 1-2 SERVINGS/DAY"] <- 10
+US$GRAINS[US$whole_grains == "(3) 3-4 SERVINGS/DAY"] <- 10
+US$GRAINS[US$whole_grains == "(4) 5 OR MORE SERVINGS/DAY"] <- 0
+
+
+US$FISH[US$ocean_fish == "(1) NEVER"] <- 0
+US$FISH[US$ocean_fish == "(2) LESS THAN ONCE/WEEK "] <- 0
+US$FISH[US$ocean_fish == "(3) 1-2 X/WEEK"] <- 10
+US$FISH[US$ocean_fish == "(4) 3-4 X/WEEK"] <- 10
+US$FISH[US$ocean_fish == "(5) 5 OR MORE X/WEEK"] <- 10
+
+
+
+US$HIGHFAT[US$high_fat_meat == "(5) 5 OR MORE X/WEEK"] <- 0
+US$HIGHFAT[US$high_fat_meat == "(4) 3-4 X/WEEK"] <- 0
+US$HIGHFAT[US$high_fat_meat == "(3) 1-2 X/WEEK"] <- 10
+US$HIGHFAT[US$high_fat_meat == "(2) LESS THAN ONCE/WEEK"] <- 10
+US$HIGHFAT[US$high_fat_meat == "(1) NEVER"] <- 0
+
+
+
+US$LEAN[US$lean_meat == "(1) NONE"] <- 0
+US$LEAN[US$lean_meat == "(2) LESS THAN ONCE/WEEK"] <- 0
+US$LEAN[US$lean_meat == "(3) 1-2 X/WEEK"] <- 10
+US$LEAN[US$lean_meat == "(4) 3-4 X/WEEK"] <- 10
+US$LEAN[US$lean_meat == "(5) 5 or more X/WEEK"] <- 0
+
+
+
+US$NONMEAT[US$nonmeat_proteins == "(1) NEVER"] <- 0
+US$NONMEAT[US$nonmeat_proteins == "(2) LESS THAN ONCE/WEEK"] <- 0
+US$NONMEAT[US$nonmeat_proteins == "(3) 1-2 X/WEEK"] <- 6
+US$NONMEAT[US$nonmeat_proteins == "(4) 3-4 X/WEEK"] <- 8
+US$NONMEAT[US$nonmeat_proteins == "(5) 5 OR MORE X/WEEK"] <- 10
+
+
+
+US$FASTFOOD[US$fastfood == "(1) NEVER"] <- 10
+US$FASTFOOD[US$fastfood == "(2) LESS THAN ONCE/WEEK"] <- 10
+US$FASTFOOD[US$fastfood == "(3) 1-3 X/WEEK"] <- 0
+US$FASTFOOD[US$fastfood == "(4) 4-6 X/WEEK"] <- 0
+US$FASTFOOD[US$fastfood == "(5) 7 OR MORE X/WEEK"] <- 0
+
+
+US <- na.omit(US)
+
+US_HEI <- mutate(US, HEI_US = WATER+SUGAR+VEGGIES+GRAINS+HIGHFAT+LEAN+FISH+NONMEAT+FASTFOOD)
+head(US_HEI)
+
+
+#HEI <- select(US, age, gender, WATER, SUGAR, VEGGIES, GRAINS, FISH, HIGHFAT, LEAN, NONMEAT, FASTFOOD)
+#HEI_2 <- HEI
+#HEI_2[is.na(HEI)] <- 0
+
+#HEI_2 <- HEI_2 %>% mutate (index = WATER+SUGAR+VEGGIES+GRAINS+FISH+HIGHFAT+LEAN+NONMEAT+FASTFOOD)
+
+#HEI <- HEI %>% mutate(num_NA = is.na(WATER) + is.na(SUGAR) + is.na(VEGGIES) + is.na(GRAINS) + is.na(HIGHFAT) + is.na(LEAN) + is.na(NONMEAT) + is.na(FASTFOOD))
+
+#US_HEI <- cbind(HEI, index = HEI_2$index)
+#US_HEI <- HEI %>% mutate(avg_HEI = HEI_2$index/(9-num_NA))
+
+#US_HEI
+```
+
+```{r, JAPAN DIET}
+
+Japan$WATER[Japan$water == "(1) None"] <- 0
+Japan$WATER[Japan$water == "(2) Less than 1 glass/day"] <- 4
+Japan$WATER[Japan$water == "(3) 1-3 glasses/day"] <- 6
+Japan$WATER[Japan$water == "(4) 4-7 glasses/day"] <- 8
+Japan$WATER[Japan$water == "(5) 8 or more glasses/day"] <- 10
+
+
+Japan$SUGAR[Japan$sugared_beverages == "(1) None"] <- 10
+Japan$SUGAR[Japan$sugared_beverages == "(2) Less than 1 glass/day"] <- 10
+Japan$SUGAR[Japan$sugared_beverages== "(3) 1-3 glasses/day"] <- 6
+Japan$SUGAR[Japan$sugared_beverages == "(4) 4-7 glasses/day"] <- 0
+Japan$SUGAR[Japan$sugared_beverages == "(5) 8 or more glasses/day"] <- 0
+
+
+Japan$VEGGIES[Japan$vegetables == "(1) None"] <- 0
+Japan$VEGGIES[Japan$vegetables == "(2) Less than 1 serving/day"] <- 2
+Japan$VEGGIES[Japan$vegetables == "(3) 1-4 servings/day"] <- 6
+Japan$VEGGIES[Japan$vegetables == "(4) 5-9 servings/day"] <- 10
+Japan$VEGGIES[Japan$vegetables == "(5) 10 or more servings/day"] <- 10
+
+
+Japan$GRAINS[Japan$whole_grains == "(1) None"] <- 0
+Japan$GRAINS[Japan$whole_grains == "(2) Less than 1 serving/day"] <- 0
+Japan$GRAINS[Japan$whole_grains == "(3) 1-4 servings/day"] <- 10
+Japan$GRAINS[Japan$whole_grains == "(4) 5-9 servings/day"] <- 10
+Japan$GRAINS[Japan$whole_grains == "(5) 10 or more servings/day"] <- 0
+
+Japan$LEAN[Japan$lean_meat == "(1) Never"] <- 0
+Japan$LEAN[Japan$lean_meat == "(2) Less than 1x per week"] <- 0
+Japan$LEAN[Japan$lean_meat == "(3) 1-2 x per week"] <- 10
+Japan$LEAN[Japan$lean_meat == "(4) 3-4 x per week"] <- 10
+Japan$LEAN[Japan$lean_meat == "(5) 5 or more x per week"] <- 0
+
+Japan$FISH[Japan$ocean_fish == "(1) Never"] <- 0
+Japan$FISH[Japan$ocean_fish == "(2) Less than 1x per week"] <- 0
+Japan$FISH[Japan$ocean_fish == "(3) 1-2 x per week"] <- 10
+Japan$FISH[Japan$ocean_fish == "(4) 3-4 x per week"] <- 10
+Japan$FISH[Japan$ocean_fish == "(5) 5 or more x per week"] <- 10
+
+
+
+
+Japan$HIGHFAT[Japan$high_fat_meat == "(1) Never"] <- 0
+Japan$HIGHFAT[Japan$high_fat_meat == "(2) Less than 1x per week"] <- 10
+Japan$HIGHFAT[Japan$high_fat_meat == "(3) 1-2 x per week"] <- 10
+Japan$HIGHFAT[Japan$high_fat_meat == "(4) 3-4 x per week"] <- 0
+Japan$HIGHFAT[Japan$high_fat_meat == "(5) 5 or more x per week"] <- 0
+
+
+Japan$NONMEAT[Japan$nonmeat_proteins == "(1) Never"] <- 0
+Japan$NONMEAT[Japan$nonmeat_proteins == "(2) Less than 1x per week"] <- 10
+Japan$NONMEAT[Japan$nonmeat_proteins == "(3) 1-2 x per week"] <- 6
+Japan$NONMEAT[Japan$nonmeat_proteins == "(4) 3-4 x per week"] <- 8
+Japan$NONMEAT[Japan$nonmeat_proteins == "(5) 5 or more x per week"] <- 10
+
+
+Japan$FASTFOOD[Japan$fastfood == "(1) Never"] <- 10
+Japan$FASTFOOD[Japan$fastfood == "(2) Less than 1x per week"] <-10
+Japan$FASTFOOD[Japan$fastfood == "(3) 1-2 x per week"] <- 0
+Japan$FASTFOOD[Japan$fastfood == "(4) 3-4 x per week"] <- 0
+Japan$FASTFOOD[Japan$fastfood == "(5) 5 or more x per week"] <- 0
+
+
+JAPAN_HEI <- Japan %>% mutate(HEI_JAPAN = WATER+SUGAR+VEGGIES+GRAINS+FISH+HIGHFAT+LEAN+NONMEAT+FASTFOOD)
+head(JAPAN_HEI)
+
+
+
+```
+
+```{r, US Interpersonal Qualities}
+interdependence <- US %>% select(meet_someone_new, help_someone, laugh, open_conversation, party, with_friends, popular_gathering,  goodthings_family_friends,  lively_talk, be_with_family, sexually_attractive,  complement_someone, kiss, amuse_people, be_with_loved_ones, sexual_relations, be_with_happy_people, smile_at_people, be_with_spouse, teach_advise_someone, see_old_friends, give_thanks)
+
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(1) NEVER"] <- 2
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(2) 1-6 TIMES"] <- 6
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(3) 7+ TIMES"] <- 10
+
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(1) NEVER"] <- 2
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$LAUGH[interdependence$laugh == "(1) NEVER"] <- 2
+interdependence$LAUGH[interdependence$laugh == "(2) 1-6 TIMES"] <- 6
+interdependence$LAUGH[interdependence$laugh == "(3) 7+ TIMES"] <- 10
+
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(1) NEVER"] <- 2
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(2) 1-6 TIMES"] <- 6
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(3) 7+ TIMES"] <- 10
+
+interdependence$PARTY[interdependence$party == "(1) NEVER"] <- 2
+interdependence$PARTY[interdependence$party == "(2) 1-6 TIMES"] <- 6
+interdependence$PARTY[interdependence$party == "(3) 7+ TIMES"] <- 10
+
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(1) NEVER"] <- 2
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(1) NEVER"] <- 2
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(2) 1-6 TIMES"] <- 6
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(3) 7+ TIMES"] <- 10
+
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(1) NEVER"] <- 2
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(1) NEVER"] <- 2
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(2) 1-6 TIMES"] <- 6
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(1) NEVER"] <- 2
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(1) NEVER"] <- 2
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(2) 1-6 TIMES"] <- 6
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(3) 7+ TIMES"] <- 10
+
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(1) NEVER"] <- 2
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$KISS[interdependence$kiss == "(1) NEVER"] <- 2
+interdependence$KISS[interdependence$kiss == "(2) 1-6 TIMES"] <- 6
+interdependence$KISS[interdependence$kiss == "(3) 7+ TIMES"] <- 10
+
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(1) NEVER"] <- 2
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(2) 1-6 TIMES"] <- 6
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(1) NEVER"] <- 2
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(1) NEVER"] <- 2
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(2) 1-6 TIMES"] <- 6
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(3) 7+ TIMES"] <- 10
+
+
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(1) NEVER"] <- 2
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(1) NEVER"] <- 2
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(2) 1-6 TIMES"] <- 6
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(1) NEVER"] <- 2
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(3) 7+ TIMES"] <- 10
+
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(1) NEVER"] <- 2
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(1) NEVER"] <- 2
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(1) NEVER"] <- 2
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(2) 1-6 TIMES"] <- 6
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(3) 7+ TIMES"] <- 10
+
+
+Interpersonal_Qualities <- interdependence %>% select(MEET_SOMEONE_NEW, HELP_SOMEONE, LAUGH, OPEN_CONVERSATION, PARTY, WITH_FRIENDS, POPULAR_GATHERING, GOOD_THINGS_FAMILY_FRIENDS,  LIVELY_TALK, BE_WITH_FAMILY, SEXUALLY_ATTRACTIVE,  COMPLEMENT_SOMEONE, KISS, AMUSE_PEOPLE, BE_WITH_LOVED_ONES, SEXUAL_RELATIONS, BE_WITH_HAPPY_PEOPLE, SMILE_AT_PEOPLE, BE_WITH_SPOUSE, TEACH_ADVISE_SOMEONE, SEE_OLD_FRIENDS, GIVE_THANKS)
+
+Interpersonal_Qualities <- na.omit(Interpersonal_Qualities)
+
+US_Interpersonal_Qualities <- mutate(Interpersonal_Qualities, POSITIVE_SCORE_INTER = MEET_SOMEONE_NEW + HELP_SOMEONE + LAUGH + OPEN_CONVERSATION + PARTY + WITH_FRIENDS + POPULAR_GATHERING + GOOD_THINGS_FAMILY_FRIENDS + LIVELY_TALK + BE_WITH_FAMILY+ SEXUALLY_ATTRACTIVE + COMPLEMENT_SOMEONE + KISS + AMUSE_PEOPLE + BE_WITH_LOVED_ONES + SEXUAL_RELATIONS +  BE_WITH_HAPPY_PEOPLE + SMILE_AT_PEOPLE + BE_WITH_SPOUSE + TEACH_ADVISE_SOMEONE + SEE_OLD_FRIENDS + GIVE_THANKS)
+
+head(Interpersonal_Qualities)
+```
+
+```{r, US Intrapersonal Qualities}
+independence <- US %>% select(appreciate_nature, plan_trips, read, time_with_animals , breathe_air, say_clearly, good_future, TV_movies, sit_in_sun, plan_something, relaxing_bath, see_beautiful_scenery, eat_good_meals, have_spare_time, learn_something_new, pray_meditate, good_workout, project_own_way, be_relaxed, sleep_soundly, shop, feel_no_pain)
+
+
+independence$GOOD_WORKOUT[independence$good_workout == "(1) NEVER"] <- 2
+independence$GOOD_WORKOUT[independence$good_workout == "(2) 1-6 TIMES"] <- 6
+independence$GOOD_WORKOUT[independence$good_workout == "(3) 7+ TIMES"] <- 10
+
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(1) NEVER"] <- 2
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(2) 1-6 TIMES"] <- 6
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(3) 7+ TIMES"] <- 10
+
+independence$PLAN_TRIPS[independence$plan_trips == "(1) NEVER"] <- 2
+independence$PLAN_TRIPS[independence$plan_trips == "(2) 1-6 TIMES"] <- 6
+independence$PLAN_TRIPS[independence$plan_trips == "(3) 7+ TIMES"] <- 10
+
+independence$READ[independence$read == "(1) NEVER"] <- 2
+independence$READ[independence$read == "(2) 1-6 TIMES"] <- 6
+independence$READ[independence$read == "(3) 7+ TIMES"] <- 10
+
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(1) NEVER"] <- 2
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(2) 1-6 TIMES"] <- 6
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(3) 7+ TIMES"] <- 10
+
+independence$BREATHE_AIR[independence$breathe_air == "(1) NEVER"] <- 2
+independence$BREATHE_AIR[independence$breathe_air == "(2) 1-6 TIMES"] <- 6
+independence$BREATHE_AIR[independence$breathe_air == "(3) 7+ TIMES"] <- 10
+
+independence$SAY_CLEARLY[independence$say_clearly == "(1) NEVER"] <- 2
+independence$SAY_CLEARLY[independence$say_clearly == "(2) 1-6 TIMES"] <- 6
+independence$SAY_CLEARLY[independence$say_clearly == "(3) 7+ TIMES"] <- 10
+
+independence$GOOD_FUTURE[independence$good_future == "(1) NEVER"] <- 2
+independence$GOOD_FUTURE[independence$good_future == "(2) 1-6 TIMES"] <- 6
+independence$GOOD_FUTURE[independence$good_future == "(3) 7+ TIMES"] <- 10
+
+independence$TV_MOVIES[independence$TV_movies == "(1) NEVER"] <- 2
+independence$TV_MOVIES[independence$TV_movies == "(2) 1-6 TIMES"] <- 6
+independence$TV_MOVIES[independence$TV_movies == "(3) 7+ TIMES"] <- 10
+
+independence$SIT_IN_SUN[independence$sit_in_sun == "(1) NEVER"] <- 2
+independence$SIT_IN_SUN[independence$sit_in_sun == "(2) 1-6 TIMES"] <- 6
+independence$SIT_IN_SUN[independence$sit_in_sun == "(3) 7+ TIMES"] <- 10
+
+independence$PLAN_SOMETHING[independence$plan_something == "(1) NEVER"] <- 2
+independence$PLAN_SOMETHING[independence$plan_something == "(2) 1-6 TIMES"] <- 6
+independence$PLAN_SOMETHING[independence$plan_something == "(3) 7+ TIMES"] <- 10
+
+independence$RELAXING_BATH[independence$relaxing_bath == "(1) NEVER"] <- 2
+independence$RELAXING_BATH[independence$relaxing_bath == "(2) 1-6 TIMES"] <- 6
+independence$RELAXING_BATH[independence$relaxing_bath == "(3) 7+ TIMES"] <- 10
+
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(1) NEVER"] <- 2
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(2) 1-6 TIMES"] <- 6
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(3) 7+ TIMES"] <- 10
+
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(1) NEVER"] <- 2
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(2) 1-6 TIMES"] <- 6
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(3) 7+ TIMES"] <- 10
+
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(1) NEVER"] <- 2
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(2) 1-6 TIMES"] <- 6
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(3) 7+ TIMES"] <- 10
+
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(1) NEVER"] <- 2
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(2) 1-6 TIMES"] <- 6
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(3) 7+ TIMES"] <- 10
+
+independence$PRAY_MEDITATE[independence$pray_meditate == "(1) NEVER"] <- 2
+independence$PRAY_MEDITATE[independence$pray_meditate == "(2) 1-6 TIMES"] <- 6
+independence$PRAY_MEDITATE[independence$pray_meditate == "(3) 7+ TIMES"] <- 10
+
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(1) NEVER"] <- 2
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(2) 1-6 TIMES"] <- 6
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(3) 7+ TIMES"] <- 10
+
+
+independence$BE_RELAXED[independence$be_relaxed == "(1) NEVER"] <- 2
+independence$BE_RELAXED[independence$be_relaxed == "(2) 1-6 TIMES"] <- 6
+independence$BE_RELAXED[independence$be_relaxed == "(3) 7+ TIMES"] <- 10
+
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(1) NEVER"] <- 2
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(2) 1-6 TIMES"] <- 6
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(3) 7+ TIMES"] <- 10
+
+independence$SHOP[independence$shop == "(1) NEVER"] <- 2
+independence$SHOP[independence$shop == "(2) 1-6 TIMES"] <- 6
+independence$SHOP[independence$shop == "(3) 7+ TIMES"] <- 10
+
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(1) NEVER"] <- 2
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(2) 1-6 TIMES"] <- 6
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(3) 7+ TIMES"] <- 10
+
+
+Intrapersonal_Qualities <- independence %>% select(GOOD_WORKOUT, APPRECIATE_NATURE, PLAN_TRIPS, READ, TIME_WITH_ANIMALS, BREATHE_AIR, SAY_CLEARLY, GOOD_FUTURE, TV_MOVIES, SIT_IN_SUN, PLAN_SOMETHING, RELAXING_BATH, SEE_BEAUTIFUL_SCENERY, EAT_GOOD_MEALS, HAVE_SPARE_TIME, LEARN_SOMETHING_NEW, PRAY_MEDITATE, PROJECT_OWN_WAY, BE_RELAXED, SLEEP_SOUNDLY, SHOP, FEEL_NO_PAIN)
+
+
+Intrapersonal_Qualities <- na.omit(Intrapersonal_Qualities)
+
+US_Intrapersonal_Qualities <- mutate(Intrapersonal_Qualities, POSITIVE_SCORE_INTRA = GOOD_WORKOUT + APPRECIATE_NATURE + PLAN_TRIPS + READ + TIME_WITH_ANIMALS + BREATHE_AIR + SAY_CLEARLY + GOOD_FUTURE + TV_MOVIES + SIT_IN_SUN +  PLAN_SOMETHING + RELAXING_BATH + SEE_BEAUTIFUL_SCENERY + EAT_GOOD_MEALS + HAVE_SPARE_TIME + LEARN_SOMETHING_NEW + PRAY_MEDITATE + PROJECT_OWN_WAY + BE_RELAXED + SLEEP_SOUNDLY + SHOP + FEEL_NO_PAIN)
+
+head(US_Intrapersonal_Qualities)
+
+
+```
+
+```{r, Japan Interpersonal Qualities}
+
+interdependence <- Japan %>% select(meet_someone_new, help_someone, laugh, open_conversation, party, with_friends, popular_gathering,  goodthings_family_friends,  lively_talk, be_with_family, sexually_attractive,  complement_someone, kiss, amuse_people, be_with_loved_ones, sexual_relations, be_with_happy_people, smile_at_people, be_with_spouse, teach_advise_someone, see_old_friends, give_thanks)
+
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(1) NEVER"] <- 2
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(2) 1-6 TIMES"] <- 6
+interdependence$MEET_SOMEONE_NEW[interdependence$meet_someone_new == "(3) 7+ TIMES"] <- 10
+
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(1) NEVER"] <- 2
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$HELP_SOMEONE[interdependence$help_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$LAUGH[interdependence$laugh == "(1) NEVER"] <- 2
+interdependence$LAUGH[interdependence$laugh == "(2) 1-6 TIMES"] <- 6
+interdependence$LAUGH[interdependence$laugh == "(3) 7+ TIMES"] <- 10
+
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(1) NEVER"] <- 2
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(2) 1-6 TIMES"] <- 6
+interdependence$OPEN_CONVERSATION[interdependence$open_conversation == "(3) 7+ TIMES"] <- 10
+
+interdependence$PARTY[interdependence$party == "(1) NEVER"] <- 2
+interdependence$PARTY[interdependence$party == "(2) 1-6 TIMES"] <- 6
+interdependence$PARTY[interdependence$party == "(3) 7+ TIMES"] <- 10
+
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(1) NEVER"] <- 2
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$WITH_FRIENDS[interdependence$with_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(1) NEVER"] <- 2
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(2) 1-6 TIMES"] <- 6
+interdependence$POPULAR_GATHERING[interdependence$popular_gathering == "(3) 7+ TIMES"] <- 10
+
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(1) NEVER"] <- 2
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$GOOD_THINGS_FAMILY_FRIENDS[interdependence$goodthings_family_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(1) NEVER"] <- 2
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(2) 1-6 TIMES"] <- 6
+interdependence$LIVELY_TALK[interdependence$lively_talk == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(1) NEVER"] <- 2
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_FAMILY[interdependence$be_with_family == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(1) NEVER"] <- 2
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(2) 1-6 TIMES"] <- 6
+interdependence$SEXUALLY_ATTRACTIVE[interdependence$sexually_attractive == "(3) 7+ TIMES"] <- 10
+
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(1) NEVER"] <- 2
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$COMPLEMENT_SOMEONE[interdependence$complement_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$KISS[interdependence$kiss == "(1) NEVER"] <- 2
+interdependence$KISS[interdependence$kiss == "(2) 1-6 TIMES"] <- 6
+interdependence$KISS[interdependence$kiss == "(3) 7+ TIMES"] <- 10
+
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(1) NEVER"] <- 2
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(2) 1-6 TIMES"] <- 6
+interdependence$AMUSE_PEOPLE[interdependence$amuse_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(1) NEVER"] <- 2
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_LOVED_ONES[interdependence$be_with_loved_ones == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(1) NEVER"] <- 2
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(2) 1-6 TIMES"] <- 6
+interdependence$SEXUAL_RELATIONS[interdependence$sexual_relations == "(3) 7+ TIMES"] <- 10
+
+
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(1) NEVER"] <- 2
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_HAPPY_PEOPLE[interdependence$be_with_happy_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(1) NEVER"] <- 2
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(2) 1-6 TIMES"] <- 6
+interdependence$SMILE_AT_PEOPLE[interdependence$smile_at_people == "(3) 7+ TIMES"] <- 10
+
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(1) NEVER"] <- 2
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(2) 1-6 TIMES"] <- 6
+interdependence$BE_WITH_SPOUSE[interdependence$be_with_spouse == "(3) 7+ TIMES"] <- 10
+
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(1) NEVER"] <- 2
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(2) 1-6 TIMES"] <- 6
+interdependence$TEACH_ADVISE_SOMEONE[interdependence$teach_advise_someone == "(3) 7+ TIMES"] <- 10
+
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(1) NEVER"] <- 2
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(2) 1-6 TIMES"] <- 6
+interdependence$SEE_OLD_FRIENDS[interdependence$see_old_friends == "(3) 7+ TIMES"] <- 10
+
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(1) NEVER"] <- 2
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(2) 1-6 TIMES"] <- 6
+interdependence$GIVE_THANKS[interdependence$give_thanks == "(3) 7+ TIMES"] <- 10
+
+
+Interpersonal_Qualities <- interdependence %>% select(MEET_SOMEONE_NEW, HELP_SOMEONE, LAUGH, OPEN_CONVERSATION, PARTY, WITH_FRIENDS, POPULAR_GATHERING, GOOD_THINGS_FAMILY_FRIENDS,  LIVELY_TALK, BE_WITH_FAMILY, SEXUALLY_ATTRACTIVE,  COMPLEMENT_SOMEONE, KISS, AMUSE_PEOPLE, BE_WITH_LOVED_ONES, SEXUAL_RELATIONS, BE_WITH_HAPPY_PEOPLE, SMILE_AT_PEOPLE, BE_WITH_SPOUSE, TEACH_ADVISE_SOMEONE, SEE_OLD_FRIENDS, GIVE_THANKS)
+
+Interpersonal_Qualities <- na.omit(Interpersonal_Qualities)
+
+Japan_Interpersonal_Qualities <- mutate(Interpersonal_Qualities, POSITIVE_SCORE = MEET_SOMEONE_NEW + HELP_SOMEONE + LAUGH + OPEN_CONVERSATION + PARTY + WITH_FRIENDS + POPULAR_GATHERING + GOOD_THINGS_FAMILY_FRIENDS + LIVELY_TALK + BE_WITH_FAMILY+ SEXUALLY_ATTRACTIVE + COMPLEMENT_SOMEONE + KISS + AMUSE_PEOPLE + BE_WITH_LOVED_ONES + SEXUAL_RELATIONS +  BE_WITH_HAPPY_PEOPLE + SMILE_AT_PEOPLE + BE_WITH_SPOUSE + TEACH_ADVISE_SOMEONE + SEE_OLD_FRIENDS + GIVE_THANKS)
+
+head(Interpersonal_Qualities)
+
+
+```
+
+```{r, Japan Intrapersonal Qualities}
+
+independence <- Japan %>% select(appreciate_nature, plan_trips, read, time_with_animals , breathe_air, say_clearly, good_future, TV_movies, sit_in_sun, plan_something, relaxing_bath, see_beautiful_scenery, eat_good_meals, have_spare_time, learn_something_new, pray_meditate, good_workout, project_own_way, be_relaxed, sleep_soundly, shop, feel_no_pain)
+
+
+independence$GOOD_WORKOUT[independence$good_workout == "(1) NEVER"] <- 2
+independence$GOOD_WORKOUT[independence$good_workout == "(2) 1-6 TIMES"] <- 6
+independence$GOOD_WORKOUT[independence$good_workout == "(3) 7+ TIMES"] <- 10
+
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(1) NEVER"] <- 2
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(2) 1-6 TIMES"] <- 6
+independence$APPRECIATE_NATURE[independence$appreciate_nature == "(3) 7+ TIMES"] <- 10
+
+independence$PLAN_TRIPS[independence$plan_trips == "(1) NEVER"] <- 2
+independence$PLAN_TRIPS[independence$plan_trips == "(2) 1-6 TIMES"] <- 6
+independence$PLAN_TRIPS[independence$plan_trips == "(3) 7+ TIMES"] <- 10
+
+independence$READ[independence$read == "(1) NEVER"] <- 2
+independence$READ[independence$read == "(2) 1-6 TIMES"] <- 6
+independence$READ[independence$read == "(3) 7+ TIMES"] <- 10
+
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(1) NEVER"] <- 2
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(2) 1-6 TIMES"] <- 6
+independence$TIME_WITH_ANIMALS[independence$time_with_animals == "(3) 7+ TIMES"] <- 10
+
+independence$BREATHE_AIR[independence$breathe_air == "(1) NEVER"] <- 2
+independence$BREATHE_AIR[independence$breathe_air == "(2) 1-6 TIMES"] <- 6
+independence$BREATHE_AIR[independence$breathe_air == "(3) 7+ TIMES"] <- 10
+
+independence$SAY_CLEARLY[independence$say_clearly == "(1) NEVER"] <- 2
+independence$SAY_CLEARLY[independence$say_clearly == "(2) 1-6 TIMES"] <- 6
+independence$SAY_CLEARLY[independence$say_clearly == "(3) 7+ TIMES"] <- 10
+
+independence$GOOD_FUTURE[independence$good_future == "(1) NEVER"] <- 2
+independence$GOOD_FUTURE[independence$good_future == "(2) 1-6 TIMES"] <- 6
+independence$GOOD_FUTURE[independence$good_future == "(3) 7+ TIMES"] <- 10
+
+independence$TV_MOVIES[independence$TV_movies == "(1) NEVER"] <- 2
+independence$TV_MOVIES[independence$TV_movies == "(2) 1-6 TIMES"] <- 6
+independence$TV_MOVIES[independence$TV_movies == "(3) 7+ TIMES"] <- 10
+
+independence$SIT_IN_SUN[independence$sit_in_sun == "(1) NEVER"] <- 2
+independence$SIT_IN_SUN[independence$sit_in_sun == "(2) 1-6 TIMES"] <- 6
+independence$SIT_IN_SUN[independence$sit_in_sun == "(3) 7+ TIMES"] <- 10
+
+independence$PLAN_SOMETHING[independence$plan_something == "(1) NEVER"] <- 2
+independence$PLAN_SOMETHING[independence$plan_something == "(2) 1-6 TIMES"] <- 6
+independence$PLAN_SOMETHING[independence$plan_something == "(3) 7+ TIMES"] <- 10
+
+independence$RELAXING_BATH[independence$relaxing_bath == "(1) NEVER"] <- 2
+independence$RELAXING_BATH[independence$relaxing_bath == "(2) 1-6 TIMES"] <- 6
+independence$RELAXING_BATH[independence$relaxing_bath == "(3) 7+ TIMES"] <- 10
+
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(1) NEVER"] <- 2
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(2) 1-6 TIMES"] <- 6
+independence$SEE_BEAUTIFUL_SCENERY[independence$see_beautiful_scenery == "(3) 7+ TIMES"] <- 10
+
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(1) NEVER"] <- 2
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(2) 1-6 TIMES"] <- 6
+independence$EAT_GOOD_MEALS[independence$eat_good_meals == "(3) 7+ TIMES"] <- 10
+
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(1) NEVER"] <- 2
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(2) 1-6 TIMES"] <- 6
+independence$HAVE_SPARE_TIME[independence$have_spare_time == "(3) 7+ TIMES"] <- 10
+
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(1) NEVER"] <- 2
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(2) 1-6 TIMES"] <- 6
+independence$LEARN_SOMETHING_NEW[independence$learn_something_new == "(3) 7+ TIMES"] <- 10
+
+independence$PRAY_MEDITATE[independence$pray_meditate == "(1) NEVER"] <- 2
+independence$PRAY_MEDITATE[independence$pray_meditate == "(2) 1-6 TIMES"] <- 6
+independence$PRAY_MEDITATE[independence$pray_meditate == "(3) 7+ TIMES"] <- 10
+
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(1) NEVER"] <- 2
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(2) 1-6 TIMES"] <- 6
+independence$PROJECT_OWN_WAY[independence$project_own_way == "(3) 7+ TIMES"] <- 10
+
+
+independence$BE_RELAXED[independence$be_relaxed == "(1) NEVER"] <- 2
+independence$BE_RELAXED[independence$be_relaxed == "(2) 1-6 TIMES"] <- 6
+independence$BE_RELAXED[independence$be_relaxed == "(3) 7+ TIMES"] <- 10
+
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(1) NEVER"] <- 2
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(2) 1-6 TIMES"] <- 6
+independence$SLEEP_SOUNDLY[independence$sleep_soundly == "(3) 7+ TIMES"] <- 10
+
+independence$SHOP[independence$shop == "(1) NEVER"] <- 2
+independence$SHOP[independence$shop == "(2) 1-6 TIMES"] <- 6
+independence$SHOP[independence$shop == "(3) 7+ TIMES"] <- 10
+
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(1) NEVER"] <- 2
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(2) 1-6 TIMES"] <- 6
+independence$FEEL_NO_PAIN[independence$feel_no_pain == "(3) 7+ TIMES"] <- 10
+
+
+Intrapersonal_Qualities <- independence %>% select(GOOD_WORKOUT, APPRECIATE_NATURE, PLAN_TRIPS, READ, TIME_WITH_ANIMALS, BREATHE_AIR, SAY_CLEARLY, GOOD_FUTURE, TV_MOVIES, SIT_IN_SUN, PLAN_SOMETHING, RELAXING_BATH, SEE_BEAUTIFUL_SCENERY, EAT_GOOD_MEALS, HAVE_SPARE_TIME, LEARN_SOMETHING_NEW, PRAY_MEDITATE, PROJECT_OWN_WAY, BE_RELAXED, SLEEP_SOUNDLY, SHOP, FEEL_NO_PAIN)
+
+
+Intrapersonal_Qualities <- na.omit(Intrapersonal_Qualities)
+
+Japan_Intrapersonal_Qualities <- mutate(Intrapersonal_Qualities, POSITIVE_SCORE = GOOD_WORKOUT + APPRECIATE_NATURE + PLAN_TRIPS + READ + TIME_WITH_ANIMALS + BREATHE_AIR + SAY_CLEARLY + GOOD_FUTURE + TV_MOVIES + SIT_IN_SUN +  PLAN_SOMETHING + RELAXING_BATH + SEE_BEAUTIFUL_SCENERY + EAT_GOOD_MEALS + HAVE_SPARE_TIME + LEARN_SOMETHING_NEW + PRAY_MEDITATE + PROJECT_OWN_WAY + BE_RELAXED + SLEEP_SOUNDLY + SHOP + FEEL_NO_PAIN)
+
+head(Intrapersonal_Qualities)
+```
+
+```{r, export csv}
+install.packages("jtools")
+library(jtools)
+install.packages("broom")
+library(broom)
+install.packages("ggstance")
+library(ggstance)
+
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("ggridges")
+library(ggridges)
+
+summary(US_HEI)
+head(US_HEI)
+summary(JAPAN_HEI)
+head(JAPAN_HEI)
+HEI_TOTAL <- merge(US_HEI, JAPAN_HEI)
+HEI_TOTAL
+
+write.csv(US_HEI, "US_HEI.csv")
+write.csv(JAPAN_HEI, "JAPAN_HEI.csv")
+```
+
+```{r}
+
+```
+
