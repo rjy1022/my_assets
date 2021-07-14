@@ -1,0 +1,524 @@
+---
+title: "Extraction of genotypes per fam ID"
+author: "June Ro"
+date: "5/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager" , repos = 'http://cran.us.r-project.org')
+
+#BiocManager::install("RVS")
+
+#install.packages("gRbase")
+library("RVS")
+library(dplyr)
+
+```
+
+```{r}
+getwd()
+setwd("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch")
+fam <- read.table("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch/epi4k_exome_ped_file_forRVS.fam")
+colnames(fam) <- as.character(fam[1,])
+fam <- fam[-1, ]
+```
+
+```{r}
+#install.packages("Matrix", repos = "http://cran.us.r-project.org")
+library(Matrix)
+#install.packages("kinship2", repos = "http://cran.us.r-project.org")
+library(kinship2)
+
+
+fam$SEX <- as.numeric(fam$SEX) #there is an error with 'sex' variable because it is a character; convert it to numeric
+class(fam$SEX) #check
+fam$Affected <- as.numeric(fam$Affected)
+class(fam$Affected) #check
+
+
+pedRVS <- pedigree(id = fam$IID, dadid = fam$PID, momid = fam$MID, sex = fam$SEX, affected = fam$Affected, famid = fam$FID, missid = 0)
+fams <- unique(fam$FID)
+#fams
+#pedRVS
+
+#pdf("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch/pedigrees_RVS_051421.pdf")
+#for(i in 1:length(fams)){plot(pedRVS[fams[i]])legend("topleft", legend = fams[i], bty = "n")}
+#dev.off() #dev. off shuts down the specified (by default the current) device. If the current device is shut down and any other devices are open, the next open device is made current.
+
+```
+
+```{r}
+#take note of families with probability under 0.05
+#for (i in 1:155){sharingprob <- RVsharing(pedRVS[fams[i]], useAffected = TRUE)print(sharingprob[which(sharingprob < 0.05)])}
+
+#subset families with probability under 0.05
+fams_under0.05 <- data.frame(famID = fams[c(5, 7, 10, 18, 21, 24, 31, 36, 42, 43, 46, 47, 54:58, 61, 71:74, 77, 79, 83, 91, 97, 100, 104, 106:109, 115, 117:120, 122, 123, 125, 129, 131, 133, 138, 140:143, 148, 149, 152)])
+
+#fams_under0.05
+```
+
+
+```{r}
+#install.packages("vcfR")
+library(vcfR)
+
+samID_to_gwasID <- read.table("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch/exome_sampleid_to_gwasid.txt")
+#samID_to_gwasID
+
+merged <- merge(fams_under0.05, samID_to_gwasID, by.x = "famID", by.y = "V3") 
+#merged
+
+tier2_0.01 <- read.vcfR("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch/epi4k_exome_RVS_genotypes_MAF0.01_tier2.recode.vcf", verbose = FALSE )
+#head(tier2_0.01, 40)
+
+tier1_0.01 <- read.vcfR("/Users/junero/Desktop/BIOL/BIOL 499R /EpilepsyResearch/epi4k_exome_RVS_genotypes_MAF0.01_tier1.recode.vcf", verbose = FALSE )
+
+options(max.print=999999)
+gt <- extract.gt(tier2_0.01, element = 'GT')
+gt <- data.frame(gt)
+```
+
+# Extract genotype per fam ID
+
+## famID 129
+```{r}
+gt_121 <- gt %>%
+  select(epifam16922cgb4, epifam16028cgb1) %>%
+  filter((epifam16922cgb4 == "1/1" | epifam16922cgb4 == "0/1") & (epifam16028cgb1 == "1/1" | epifam16028cgb1 == "0/1"))
+gt_121
+```
+
+## famID 164
+```{r}
+gt_164 <- gt %>%
+  select(epifam22168cgg11, epifam16790cgg1, epifam16793cgg4, epifam16795cgg6 ) %>%
+  filter(epifam22168cgg11 == "1/1" | epifam22168cgg11 == "0/1" | epifam16790cgg1 == "1/1" | epifam16790cgg1 == "0/1" | epifam16793cgg4 == "1/1" | epifam16793cgg4 == "0/1" | epifam16795cgg6 == "1/1" | epifam16795cgg6 == "0/1" )
+gt_164
+```
+
+## famID 165
+```{r}
+gt_165 <- gt %>%
+  select(epifam16933blb8, epifam16799blb4, epifam16934blb9) %>%
+  filter(epifam16933blb8 == "1/1" | epifam16933blb8 == "0/1" | epifam16799blb4 == "1/1" | epifam16799blb4 == "0/1" | epifam16934blb9 == "1/1" | epifam16934blb9 == "0/1")
+gt_165
+```
+
+## famID 209
+```{r}
+gt_209 <- gt %>%
+  select(epifam18396blh4, epifam18397blh1, epifam18401blh6 ) %>%
+  filter(epifam18396blh4 == "1/1" | epifam18396blh4 == "0/1" | epifam18397blh1 == "1/1" | epifam18397blh1 == "0/1" | epifam18401blh6 == "1/1" | epifam18401blh6 == "0/1")
+gt_209
+```
+
+## famID 280
+```{r}
+gt_280 <- gt %>%
+  select(epifam21801cgm1, epifam22185cgm6) %>%
+  filter(epifam21801cgm1 == "1/1" | epifam21801cgm1 == "0/1" | epifam22185cgm6 == "1/1" | epifam22185cgm6 == "0/1")
+gt_280
+```
+
+## famID 38
+```{r}
+#'epifam3822btp' not found so excluded
+
+gt_38 <- gt %>%
+  select(epifam3837btp, epifam3825btp) %>%
+  filter(epifam3837btp == "1/1" | epifam3837btp == "0/1" | epifam3825btp == "1/1" | epifam3825btp == "0/1")
+gt_38
+```
+
+## famID 44
+```{r}
+gt_44 <- gt %>%
+  select(epifam549biv1, epifam553biv7, epifam552biv6 ) %>%
+  filter(epifam549biv1 == "1/1" | epifam549biv1 == "0/1" | epifam553biv7 == "1/1" | epifam553biv7 == "0/1" | epifam552biv6 == "1/1" | epifam552biv6 == "0/1")
+gt_44
+```
+
+## famID 48
+```{r}
+gt_48 <- gt %>%
+  select(epifam568biw1new, 	epifam576biw8) %>%
+  filter(	epifam568biw1new == "1/1" | 	epifam568biw1new == "0/1" | epifam576biw8 == "1/1" | 	epifam576biw8 == "0/1")
+gt_48
+
+```
+
+## famID 58
+```{r}
+gt_58 <- gt %>%
+  select(epifam615bkw5, epifam614bkw1) %>%
+  filter(epifam615bkw5 == "1/1" | 	epifam615bkw5 == "0/1" | epifam614bkw1 == "1/1" | epifam614bkw1 == "0/1")
+gt_58
+```
+
+## famID 60
+```{r}
+gt_60 <- gt %>%
+  select(epifam6045bts, epifam6058bts) %>%
+  filter(epifam6045bts == "1/1" | 	epifam6045bts == "0/1" | epifam6058bts == "1/1" | epifam6058bts == "0/1")
+gt_60
+```
+
+## famID 68
+```{r}
+gt_68 <- gt %>%
+  select(epifam16089bix1, epifam3257bix8, epifam3261bix9) %>%
+  filter(epifam16089bix1 == "1/1" | epifam16089bix1 == "0/1" | epifam3257bix8 == "1/1" | epifam3257bix8 == "0/1" | 	epifam3261bix9 == "1/1" |	epifam3261bix9 == "0/1")
+gt_68
+```
+
+## famID 73
+```{r}
+gt_73 <- gt %>%
+  select(epifam73416btt, 	epifam73414btt, epifam7329btt, epifam73314btt) %>%
+  filter(epifam73416btt == "1/1" | epifam73416btt == "0/1" | 	epifam73414btt == "1/1" | 	epifam73414btt == "0/1" | epifam7329btt == "1/1" | epifam7329btt == "0/1" | epifam73314btt == "1/1" | epifam73314btt == "0/1" )
+gt_73
+```
+
+## famID 80388
+```{r}
+gt_80388 <- gt %>%
+  select(epifam5669cgp12, epifam5660cgp1, epifam6870cgp14) %>%
+  filter(epifam5669cgp12 == "1/1" | epifam5669cgp12 == "0/1" | epifam5660cgp1 == "1/1" | epifam5660cgp1 == "0/1" | 	epifam6870cgp14 == "1/1" |	epifam6870cgp14 == "0/1")
+gt_80388
+```
+
+## famID 81081
+```{r}
+gt_81081 <- gt %>%
+  select(epifam2001cgu5, epifam23269cgu7, epifam8246cgu1) %>%
+  filter(epifam2001cgu5 == "1/1" | epifam2001cgu5 == "0/1" | epifam23269cgu7 == "1/1" | epifam23269cgu7 == "0/1" | 	epifam8246cgu1 == "1/1" |	epifam8246cgu1 == "0/1")
+gt_81081
+```
+
+## famID 81397
+```{r}
+gt_81397 <- gt %>%
+  select(epifam8862cgx3, epifam26635cgx5, epifam26092cgx1 ) %>%
+  filter(epifam8862cgx3 == "1/1" | epifam8862cgx3 == "0/1" | epifam26635cgx5 == "1/1" | epifam26635cgx5 == "0/1" | 	epifam26092cgx1 == "1/1" |	epifam26092cgx1 == "0/1")
+gt_81397
+```
+
+## famID 82036
+```{r}
+gt_82036 <- gt %>%
+  select(epifam10021chc4, epifam10075chc6, epifam9514chc1 ) %>%
+  filter(epifam10021chc4 == "1/1" | epifam10021chc4 == "0/1" | epifam10075chc6 == "1/1" | epifam10075chc6 == "0/1" | 	epifam9514chc1 == "1/1" |	epifam9514chc1 == "0/1")
+gt_82036
+```
+
+## famID 82065
+```{r}
+gt_82065 <- gt %>%
+  select(epifam14543bme8, epifam14104bme1, epifam14103bme4) %>%
+  filter(epifam14543bme8 == "1/1" | epifam14543bme8 == "0/1" | epifam14104bme1 == "1/1" | epifam14104bme1 == "0/1" | 	epifam14103bme4 == "1/1" |	epifam14103bme4 == "0/1")
+gt_82065
+```
+
+## famID 82072
+```{r}
+gt_82072 <- gt %>%
+  select(epifam14735beb7, epifam14766beb5, epifam15430beb1) %>%
+  filter(epifam14735beb7 == "1/1" | epifam14735beb7 == "0/1" | 	epifam14766beb5 == "1/1" | 	epifam14766beb5 == "0/1" | 	epifam15430beb1 == "1/1" |	epifam15430beb1 == "0/1")
+gt_82072
+```
+
+## famID 82427
+```{r}
+#'epifam204che4' not found so excluded
+
+gt_82427 <- gt %>%
+  select(epifam224che6, epifam248che1) %>%
+  filter(epifam224che6 == "1/1" | epifam224che6 == "0/1" | 	epifam248che1 == "1/1" | 	epifam248che1 == "0/1")
+gt_82427
+```
+
+## famID 82451_EPGP014255
+```{r}
+gt_82451_EPGP014255 <- gt %>%
+  select(epifam701ach8, epifam868ach10) %>%
+  filter(epifam701ach8 == "1/1" | epifam701ach8 == "0/1" | 	epifam868ach10 == "1/1" | 	epifam868ach10 == "0/1")
+gt_82451_EPGP014255
+```
+
+## famID 82467
+```{r}
+gt_82467<- gt %>%
+  select(epifam744chf5, epifam293chf1, epifam723chf4 ) %>%
+  filter(epifam744chf5 == "1/1" | epifam744chf5 == "0/1" | 	epifam293chf1 == "1/1" | epifam293chf1 == "0/1" | 	epifam723chf4 == "1/1" |	epifam723chf4 == "0/1")
+gt_82467
+```
+
+## famID 82470
+```{r}
+gt_82470<- gt %>%
+  select(epifam302chg5, epifam2361chg4, epifam1204chg1) %>%
+  filter(epifam302chg5 == "1/1" | epifam302chg5 == "0/1" | epifam2361chg4 == "1/1" | epifam2361chg4 == "0/1" | 	epifam1204chg1 == "1/1" |	epifam1204chg1 == "0/1")
+gt_82470
+```
+
+## famID 82472
+```{r}
+gt_82472 <- gt %>%
+  select(epifam703chh6, epifam312chh1) %>%
+  filter(epifam703chh6 == "1/1" | epifam703chh6 == "0/1" | 	epifam312chh1 == "1/1" | 	epifam312chh1 == "0/1")
+gt_82472
+```
+
+## famID 82522
+```{r}
+gt_82522<- gt %>%
+  select(epifam791chj1, epifam794chj4, epifam792chj2) %>%
+  filter(epifam791chj1 == "1/1" | epifam791chj1 == "0/1" | epifam794chj4 == "1/1" | epifam794chj4 == "0/1" | 	epifam792chj2 == "1/1" |	epifam792chj2 == "0/1")
+gt_82522
+```
+
+## famID 82549
+```{r}
+gt_82549<- gt %>%
+  select(epifam16847chm1, epifam943chm9, epifam877chm6) %>%
+  filter(epifam16847chm1 == "1/1" | epifam16847chm1 == "0/1" | epifam943chm9 == "1/1" | epifam943chm9 == "0/1" | 	epifam877chm6 == "1/1" |	epifam877chm6 == "0/1")
+gt_82549
+```
+
+## famID 82692
+```{r}
+#'epifam1480chs11' not found so excluded
+gt_82692 <- gt %>%
+  select(epifam1571chs3, 	epifam32136chs13, epifam1422chs9, epifam73314btt) %>%
+  filter(epifam1571chs3 == "1/1" | epifam1571chs3 == "0/1" | 	epifam32136chs13 == "1/1" | epifam32136chs13 == "0/1" | epifam1422chs9 == "1/1" | epifam1422chs9 == "0/1")
+gt_82692
+```
+
+## famID 83383
+```{r}
+gt_83383 <- gt %>%
+  select(epifam2955cia1, epifam3087cia4, epifam3757cia8) %>%
+  filter(epifam2955cia1 == "1/1" | epifam2955cia1 == "0/1" | 	epifam3087cia4 == "1/1" | epifam3087cia4 == "0/1" | epifam3757cia8 == "1/1" | epifam3757cia8 == "0/1")
+gt_83383
+```
+
+## famID 83438
+```{r}
+gt_83438 <- gt %>%
+  select(epifam3352ckc1, epifam3623ckc9) %>%
+  filter(epifam3352ckc1 == "1/1" | 	epifam3352ckc1 == "0/1" | epifam3623ckc9 == "1/1" | epifam3623ckc9 == "0/1")
+gt_83438
+```
+
+## famID 83506
+```{r}
+gt_83506 <- gt %>%
+  select(epifam3786cic1, epifam3788cic8, epifam17077cic5) %>%
+  filter(epifam3786cic1 == "1/1" | epifam3786cic1 == "0/1" | 	epifam3788cic8 == "1/1" | epifam3788cic8 == "0/1" | epifam17077cic5 == "1/1" | epifam17077cic5 == "0/1")
+gt_83506
+```
+
+## famID 83787
+```{r}
+gt_83787 <- gt %>%
+  select(epifam16707cif1, epifam18860cif18, epifam17407cif9, epifam17405cif8) %>%
+  filter(epifam16707cif1 == "1/1" | epifam16707cif1 == "0/1" | 	epifam18860cif18 == "1/1" | 	epifam18860cif18 == "0/1" | 	epifam17407cif9 == "1/1" | 	epifam17407cif9 == "0/1" | epifam17405cif8 == "1/1" | epifam17405cif8 == "0/1" )
+gt_83787
+```
+
+## famID 83795
+```{r}
+gt_83795 <- gt %>%
+  select(epifam23876ckd7, epifam24310ckd8, epifam16718ckd1) %>%
+  filter(epifam23876ckd7 == "1/1" | epifam23876ckd7 == "0/1" | 	epifam24310ckd8 == "1/1" | 	epifam24310ckd8 == "0/1" | epifam16718ckd1 == "1/1" | epifam16718ckd1 == "0/1")
+gt_83795
+```
+
+## famID 84033
+```{r}
+gt_84033 <- gt %>%
+  select(epifam17514bmf7, epifam15207bmf1) %>%
+  filter(epifam17514bmf7 == "1/1" | epifam17514bmf7 == "0/1" | epifam15207bmf1 == "1/1" | epifam15207bmf1 == "0/1")
+gt_84033
+```
+
+## famID 84584_EPGP012661
+```{r}
+gt_84584_EPGP012661 <- gt %>%
+  select(epprnd31238anz1, epifam20726anz8) %>%
+  filter(epprnd31238anz1 == "1/1" | epprnd31238anz1 == "0/1" | epifam20726anz8 == "1/1" | epifam20726anz8 == "0/1")
+gt_84584_EPGP012661
+```
+
+## famID 84762_EPGP015319
+```{r}
+gt_84762_EPGP015319 <- gt %>%
+  select(epifam20618ayz6, epifam21504ayz10, epprnd37465ayz1, epifam21279ayz8, epifam20510ayz5) %>%
+  filter(epifam20618ayz6 == "1/1" | epifam20618ayz6 == "0/1" | 	epifam21504ayz10 == "1/1" | 	epifam21504ayz10 == "0/1" | epprnd37465ayz1 == "1/1" | 	epprnd37465ayz1 == "0/1" | epifam21279ayz8 == "1/1" | epifam21279ayz8 == "0/1" | epifam20510ayz5 == "1/1" | epifam20510ayz5 == "0/1" )
+gt_84762_EPGP015319
+```
+
+## famID 84832
+```{r}
+gt_84832 <- gt %>%
+  select(epifam19737cil7, 	epifam19189cil1) %>%
+  filter(epifam19737cil7 == "1/1" | epifam19737cil7 == "0/1" | 	epifam19189cil1 == "1/1" |	epifam19189cil1 == "0/1")
+gt_84832
+```
+
+## famID 84834
+```{r}
+gt_84834 <- gt %>%
+  select(epifam19193cim1, epifam20443cim4, epifam26630cim8) %>%
+  filter(	epifam19193cim1 == "1/1" | 	epifam19193cim1 == "0/1" | 	epifam20443cim4 == "1/1" | 	epifam20443cim4 == "0/1" | epifam26630cim8 == "1/1" | epifam26630cim8 == "0/1")
+gt_84834
+```
+
+## famID 84858
+```{r}
+#Column `epifam19249cio4` and epifam19248cio3 doesn't exist so excluded
+
+gt_84858 <- gt %>%
+  select(epifam19250cio5, epifam19246cio1, epifam24027cio7) %>%
+  filter(epifam19250cio5 == "1/1" | 	epifam19250cio5 == "0/1" | epifam19246cio1 == "1/1" | 	epifam19246cio1 == "0/1" | epifam24027cio7 == "1/1" | epifam24027cio7 == "0/1" )
+gt_84858
+```
+
+## famID 86269
+```{r}
+gt_86269 <- gt %>%
+  select(epifam23043ckg6, 	epifam23807ckg5, epifam23046ckg1) %>%
+  filter(	epifam23043ckg6 == "1/1" | 	epifam23043ckg6 == "0/1" | 		epifam23807ckg5 == "1/1" | 		epifam23807ckg5 == "0/1" | epifam23046ckg1 == "1/1" | epifam23046ckg1 == "0/1")
+gt_86269
+```
+
+## famID 87223
+```{r}
+gt_87223 <- gt %>%
+  select(epifam3875cjg18, epifam25608cjg1) %>%
+  filter(epifam3875cjg18 == "1/1" | epifam3875cjg18 == "0/1" | 	epifam25608cjg1 == "1/1" | epifam25608cjg1 == "0/1")
+```
+
+## famID 87246
+```{r}
+gt_87246 <- gt %>%
+  select(	epifam26253cjh7, epifam25690cjh4, epifam25686cjh1) %>%
+  filter(	epifam26253cjh7 == "1/1" | 		epifam26253cjh7 == "0/1" | 	epifam25690cjh4 == "1/1" | 	epifam25690cjh4 == "0/1" | epifam25686cjh1 == "1/1" | epifam25686cjh1 == "0/1")
+gt_87246
+```
+
+## famID 87711
+```{r}
+gt_87711 <- gt %>%
+  select(	epifam31968cjk3, epifam31966cjk1, epifam26915cjk5) %>%
+  filter(	epifam31968cjk3 == "1/1" | 	epifam31968cjk3 == "0/1" | 	epifam31966cjk1 == "1/1" | 	epifam31966cjk1 == "0/1" | epifam26915cjk5 == "1/1" | epifam26915cjk5 == "0/1")
+gt_87711
+
+```
+
+## famID 88
+```{r}
+gt_88 <- gt %>%
+  select(epifam8832btw, epifam8835btw, epifam8828btw) %>%
+  filter(epifam8832btw == "1/1" | epifam8832btw == "0/1" | epifam8835btw == "1/1" | epifam8835btw == "0/1" | epifam8828btw == "1/1" | epifam8828btw == "0/1")
+gt_88
+```
+
+## famID 90022
+```{r}
+gt_90022 <- gt %>%
+  select(epifam20166bml21, epifam20689bml6, epifam20224bml2) %>%
+  filter(epifam20166bml21 == "1/1" | epifam20166bml21 == "0/1" | epifam20689bml6 == "1/1" | epifam20689bml6 == "0/1" | epifam20224bml2 == "1/1" | epifam20224bml2 == "0/1")
+gt_90022
+```
+
+## famID A
+```{r}
+gt_A <- gt %>%
+  select(epifam01228bin13, 	epifam01223bin9, epifam01232bin7 ) %>%
+  filter(epifam01228bin13 == "1/1" | epifam01228bin13 == "0/1" | 	epifam01223bin9 == "1/1" | 	epifam01223bin9 == "0/1" | epifam01232bin7 == "1/1" | epifam01232bin7 == "0/1")
+gt_A
+```
+
+## famID EG29
+```{r}
+gt_EG29 <- gt %>%
+  select(epifam2912ckp3, epifam2911ckp1, epifam2902ckp2 ) %>%
+  filter(epifam2912ckp3 == "1/1" | epifam2912ckp3 == "0/1" | 	epifam2911ckp1 == "1/1" | 	epifam2911ckp1 == "0/1" | epifam2902ckp2 == "1/1" | epifam2902ckp2 == "0/1")
+gt_EG29
+```
+
+## famID EG302
+```{r}
+gt_EG302 <- gt %>%
+  select(epifam30201bjk1, epifam30207bjk7, 	epifam30204bjk4 ) %>%
+  filter(epifam30201bjk1 == "1/1" | epifam30201bjk1 == "0/1" | epifam30207bjk7 == "1/1" | epifam30207bjk7 == "0/1" | 	epifam30204bjk4 == "1/1" | 	epifam30204bjk4 == "0/1")
+gt_EG302
+```
+
+## famID EG44
+```{r}
+gt_EG44 <- gt %>%
+  select(epifam4417ckq2, epifam4419ckq3, epifam4401ckq1 ) %>%
+  filter(epifam4417ckq2 == "1/1" | 	epifam4417ckq2 == "0/1" | epifam4419ckq3 == "1/1" | epifam4419ckq3 == "0/1" | epifam4401ckq1 == "1/1" | epifam4401ckq1 == "0/1")
+gt_EG44
+```
+
+## famID EG46
+```{r}
+gt_EG46 <- gt %>%
+  select(epifam4602ckr1, epifam4625ckr2) %>%
+  filter(epifam4602ckr1 == "1/1" | epifam4602ckr1 == "0/1" | epifam4625ckr2 == "1/1" | epifam4625ckr2 == "0/1")
+gt_EG46
+```
+
+## famID EG60
+```{r}
+gt_EG60 <- gt %>%
+  select(epifam6006bje6, epifam6001bje1, epifam6004bje4) %>%
+  filter(epifam6006bje6 == "1/1" | 	epifam6006bje6 == "0/1" | epifam6001bje1 == "1/1" | epifam6001bje1 == "0/1" | epifam6004bje4 == "1/1" | epifam6004bje4 == "0/1")
+gt_EG60
+```
+
+## famID EP13
+```{r}
+gt_EP13 <- gt %>%
+  select(	epifam139cky3, epifam141cky4, 	epifam132cky2) %>%
+  filter(	epifam139cky3 == "1/1" | 		epifam139cky3 == "0/1" | epifam141cky4 == "1/1" | epifam141cky4 == "0/1" | 	epifam132cky2 == "1/1" | 	epifam132cky2 == "0/1")
+gt_EP13
+```
+
+## famID EP236
+```{r}
+gt_EP236 <- gt %>%
+  select(	epifam2362cla1, epifam2361cla2, epifam2363cla3) %>%
+  filter(	epifam2362cla1 == "1/1" | 	epifam2362cla1 == "0/1" | epifam2361cla2 == "1/1" | epifam2361cla2 == "0/1" | epifam2363cla3 == "1/1" | epifam2363cla3 == "0/1")
+gt_EP236
+```
+
+## famID EP26
+```{r}
+gt_EP26 <- gt %>%
+  select(epifam2624ckv3, epifam2616ckv1, epifam2604ckv2) %>%
+  filter(epifam2624ckv3 == "1/1" | 	epifam2624ckv3 == "0/1" | epifam2616ckv1 == "1/1" | epifam2616ckv1 == "0/1" | epifam2604ckv2 == "1/1" | epifam2604ckv2 == "0/1")
+gt_EP26
+```
+
+```{r}
+#visualization
+#heatmap.bp(gt)
+
+chrom <- create.chromR(name='Supercontig', vcf=tier2_0.01)
+chrom <- proc.chromR(chrom, verbose=TRUE)
+plot(chrom)
+chromoqc(chrom, dp.alpha=20)
+```
+
+
+
