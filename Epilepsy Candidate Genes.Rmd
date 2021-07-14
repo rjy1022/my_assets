@@ -1,0 +1,133 @@
+---
+title: "Epilepsy Candidate Genes"
+author: "June Ro"
+date: "3/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("readxl", repos = 'http://cran.us.r-project.org')
+library("readxl")
+
+install.packages("dplyr", repos = 'http://cran.us.r-project.org')
+library("dplyr")
+
+install.packages("ggplot2", repos = 'http://cran.us.r-project.org')
+library("ggplot2")
+
+getwd()
+```
+
+# Biomart
+```{r}
+bmEdata <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "Biomart-Epilepsy")
+bmGEdata <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "Biomart-GeneralizedEpilepsy")
+bmREdata <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "Biomart-RolandEpilepsy")
+bmPEdata <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "Biomart-PartialEpilepsy")
+bmPMEdata <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "Biomart-ProgressiveMyoclonic")
+```
+
+
+```{r}
+#combine the five sheets
+bmE_GE <- full_join(bmEdata, bmGEdata)
+bmRE_PE <- full_join(bmREdata, bmPEdata)
+bm_first_four <- full_join(bmE_GE, bmRE_PE)
+bm_final <- full_join(bm_first_four, bmPMEdata)
+bm_final
+
+bmFinal <- bm_final %>% 
+  group_by(Gene) %>% 
+    summarise(counts = n()) %>% 
+      arrange(desc(counts)) %>% 
+        top_n(15, counts) %>% 
+          ggplot(aes(x=Gene, y=counts, fill=Gene)) +
+            geom_bar(stat = "identity", width = 0.7) +
+            theme(plot.margin = unit(c(20,20,20,20),'pt'), text = element_text(size=5), legend.key.size = unit(0.5, 'cm')) +
+  ggtitle('Biomart All Genes')
+
+#group by names
+bm_arranged <- arrange(bm_final, desc(Gene), group_by = Name)
+
+write.csv(bm_arranged, "Biomart_Epilepsy_Genes.csv")
+```
+
+```{r}
+#after entering chromosome names
+biomart_final <- read.csv("Biomart_Epilepsy_Genes.csv")
+
+bm_frequency <- biomart_final %>% group_by(Gene) %>% 
+  summarise(counts = n(), na.rm=T) %>% 
+  arrange(desc(counts)) %>% 
+  top_n(10, counts) %>% 
+  ggplot(aes(x=Gene, y=counts, fill=Gene)) + geom_bar(stat = "identity", width = 0.7) +
+            theme(plot.margin = unit(c(20,20,20,20),'pt'), text = element_text(size=5),        legend.key.size = unit(0.5, 'cm')) +
+  ggtitle('Final Biomart Genes Frequency')
+
+bm_frequency
+```
+
+# OMIM
+```{r}
+omim_data <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "OMIM")
+
+omim_arranged <- arrange(omim_data, group_by = Gene)
+
+write.csv(omim_arranged, "OMIM_Epilepsy_Genes.csv")
+```
+
+```{r}
+omim_final <- read.csv("OMIM_Epilepsy_Genes.csv")
+
+omim_frequency <- omim_final %>% group_by(Gene) %>% 
+  summarise(counts = n(), na.rm=T) %>% 
+  arrange(desc(counts)) %>% 
+  top_n(10, counts) %>% 
+  ggplot(aes(x=Gene, y=counts, fill=Gene)) + geom_bar(stat = "identity", width = 0.7) +
+            theme(plot.margin = unit(c(20,20,20,20),'pt'), text = element_text(size=5),        legend.key.size = unit(0.5, 'cm')) +
+  ggtitle('Final OMIM Genes Frequency')
+
+omim_frequency
+```
+
+# GeneDX
+```{r}
+geneDX1 <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "GeneDX delet dup panel")
+
+geneDX2 <- read_excel("Epilepsy Candidate Gene List.xlsx", 
+    sheet = "GeneDX delet dup PME")
+
+geneDX_combined <- rbind(geneDX1, geneDX2)
+
+geneDX_arranged <- arrange(geneDX_combined, group_by = Gene)
+
+write.csv(geneDX_arranged, "GeneDX_Epilepsy_Genes.csv")
+```
+
+```{r}
+geneDX_final <- read.csv("GeneDX_Epilepsy_Genes.csv")
+
+genedx_frequency <- geneDX_final %>% group_by(Gene) %>% 
+  summarise(counts = n(), na.rm=T) %>% 
+  arrange(desc(counts)) %>% 
+  top_n(10, counts) %>% 
+  ggplot(aes(x=Gene, y=counts, fill=Gene)) + geom_bar(stat = "identity", width = 0.7) +
+            theme(plot.margin = unit(c(20,20,20,20),'pt'), text = element_text(size=5),        legend.key.size = unit(0.5, 'cm')) +
+  ggtitle('Final geneDX Genes Frequency')
+
+genedx_frequency
+```
+
+
+
